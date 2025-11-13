@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="sw">
+<head>
+  <meta charset="UTF-8" />
+  <title>enzo</title>
+  <style>
+    body {
+      margin: 0;
+      background: #1a1a2e;
+      font-family: sans-serif;
+      overflow: hidden;
+    }
+
+    h1 {
+      text-align: center;
+      color: #fff;
+      text-shadow: 2px 2px 4px #000;
+    }
+
+    #score {
+      text-align: center;
+      color: #fff;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+
+    #gameArea {
+      width: 400px;
+      height: 600px;
+      background: linear-gradient(#1a1a2e, #16213e);
+      margin: auto;
+      position: relative;
+      overflow: hidden;
+      border: 5px solid #fff;
+      box-shadow: 0 0 20px #000;
+    }
+
+    #car {
+      width: 60px;
+      height: 100px;
+      background: red;
+      position: absolute;
+      bottom: 20px;
+      left: 170px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px #000;
+      border: 2px solid #fff;
+    }
+
+    #car::before, #car::after {
+      content: "";
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background: red;
+      border-radius: 40%;
+      bottom: 10px;
+    }
+
+    #car::before {
+      left: 5px;
+    }
+
+    #car::after {
+      right: 5px;
+    }
+
+    .obstacle {
+      width: 60px;
+      height: 100px;
+      background: yellow;
+      position: absolute;
+      top: -120px;
+      border-radius: 10px;
+      box-shadow: 0 0 5px #000;
+    }
+
+    .tree, .house {
+      position: absolute;
+      z-index: 1;
+    }
+
+    .tree {
+      width: 30px;
+      height: 60px;
+      background: green;
+      border-radius: 50% 50% 0 0;
+    }
+
+    .tree.left { left: 10px; top: 50px; }
+    .tree.right { right: 10px; top: 50px; }
+
+    .house {
+      width: 40px;
+      height: 40px;
+      background: yellow;
+    }
+
+    .house.left { left: 5px; top: 150px; }
+    .house.right { right: 5px; top: 150px; }
+  </style>
+</head>
+<body>
+  <h1>🚗enzo car simulator</h1>
+  <div id="score">Pointi: 0</div>
+  <div id="gameArea">
+    <div class="tree left"></div>
+    <div class="tree right"></div>
+    <div class="house left"></div>
+    <div class="house right"></div>
+    <div id="car"></div>
+  </div>
+
+  <audio id="crashSound" src="https://www.soundjay.com/button/sounds/button-10.mp3"></audio>
+
+  <script>
+    const gameArea = document.getElementById("gameArea");
+    const car = document.getElementById("car");
+    const scoreDisplay = document.getElementById("score");
+    const crashSound = document.getElementById("crashSound");
+
+    let carLeft = 170;
+    let score = 0;
+    let speed = 10;
+
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft" && carLeft > 10) {
+        carLeft -= 20;
+        car.style.left = carLeft + "px";
+      } else if (e.key === "ArrowRight" && carLeft < 330) {
+        carLeft += 20;
+        car.style.left = carLeft + "px";
+      }
+    });
+
+    function createObstacle() {
+      const obstacle = document.createElement("div");
+      obstacle.classList.add("obstacle");
+      obstacle.style.left = Math.floor(Math.random() * 340) + "px";
+      gameArea.appendChild(obstacle);
+
+      let topPos = -100;
+      function move() {
+        if (topPos < 600) {
+          topPos += speed;
+          obstacle.style.top = topPos + "px";
+
+          const carRect = car.getBoundingClientRect();
+          const obsRect = obstacle.getBoundingClientRect();
+          if (
+            carRect.left < obsRect.left + obsRect.width &&
+            carRect.left + carRect.width > obsRect.left &&
+            carRect.top < obsRect.top + obsRect.height &&
+            carRect.height + carRect.top > obsRect.top
+          ) {
+            crashSound.play();
+            alert("game over hhhahahahhahahaah your point: " + score);
+            location.reload();
+          }
+
+          requestAnimationFrame(move);
+        } else {
+          obstacle.remove();
+          score++;
+          scoreDisplay.textContent = "Pointi: " + score;
+          if (score % 5 === 0) speed += 1;
+        }
+      }
+      move();
+    }
+
+    setInterval(createObstacle, 2000);
+  </script>
+</body>
+</html>
